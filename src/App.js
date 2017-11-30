@@ -1,84 +1,18 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {Button} from 'react-bootstrap';
 import './App.css';
 
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      turn: 'x',
-      turnCounter: 0,
-      victory: false,
-      squares: [['', '', ''], ['', '', ''], ['', '', '']]
-    };
-  }
-
-  reset() {
-    this.setState({
-      turn: 'x',
-      turnCounter: 0,
-      victory: false,
-      squares: [['', '', ''], ['', '', ''], ['', '', '']]
-    });
-  }
-
-  registerClick(row, column) {
-    if (this.state.squares[row][column] === '' && !this.state.victory) {
-      let squares = JSON.parse(JSON.stringify(this.state.squares));
-      squares[row][column] = this.state.turn;
-      let victory = this.checkForWin(squares);
-      if (victory) {
-        this.setState({ squares, victory });
-      } else {
-        this.setState({
-          squares,
-          turnCounter: this.state.turnCounter + 1,
-          turn: this.state.turn === 'x' ? 'o' : 'x'
-        });
-      }
-    }
-  }
-
-  checkForWin(squares) {
-    if (this.state.turnCounter < 4) return false;
-    let found = false;
-    //check each row for a match
-    squares.forEach((row) => {
-      if (row[0] !== '' && row[0] === row[1] && row[0] === row[2]) {
-        found = true;
-      }
-    });
-    if (found) return true;
-    // check each column for a match
-    squares[0].forEach((value, index) => {
-      if (value !== '' 
-        && squares[1][index] === value 
-        && squares[2][index] === value
-      ) {
-        found = true;
-      }
-    });
-    if (found) return true;
-    // check diagonals
-    if (squares[1][1] !== '') {
-      if (squares[0][0] === squares[1][1] 
-        && squares[2][2] === squares[1][1]
-      ) {
-        return true;
-      }
-      if (squares[2][0] === squares[1][1] 
-        && squares[0][2] === squares[1][1]
-      ) {
-        return true;
-      }
-    }
-    return false;
+    this.state = {};
   }
   render() {
-    let squares = this.state.squares.map((row, rindex) => {
+    let squares = this.props.squares.map((row, rindex) => {
       let buttons = row.map((square, cindex) => {
         return (<Button
-          onClick={() => this.registerClick(rindex, cindex)}
+          onClick={() => this.props.registerClick(rindex, cindex)}
           style={{
             height: 75,
             width: 75,
@@ -87,14 +21,14 @@ class App extends Component {
             fontSize: 35
           }}
           id={'r' + rindex + 'c' + cindex}
-          disabled={square !== '' || this.state.victory}
+          disabled={square !== '' || this.props.victory}
         >{square}</Button>);
       });
       return (<div>{buttons}</div>);
     });
-    let message = this.state.victory 
-      ? this.state.turn + ' has won!'
-      : 'It is ' + this.state.turn + '\'s turn.'
+    let message = this.props.victory 
+      ? this.props.turn + ' has won!'
+      : 'It is ' + this.props.turn + '\'s turn.'
     return (
       <div className="App">
         <header className="App-header">
@@ -104,10 +38,18 @@ class App extends Component {
         <p className="App-intro">
           {message}
         </p>
-        <Button bsStyle="primary" onClick={() => this.reset()}>Start new game</Button>
+        <Button bsStyle="primary" onClick={() => this.props.onReset()}>Start new game</Button>
       </div>
     );
   }
+}
+
+App.propTypes = {
+  victory: PropTypes.bool,
+  squares: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)),
+  turn: PropTypes.string,
+  onReset: PropTypes.func.isRequired,
+  registerClick: PropTypes.func.isRequired
 }
 
 export default App;
